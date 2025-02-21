@@ -1,6 +1,6 @@
-const numBalls = 100;
+const numBalls = 600;
 let balls = [];
-let bigBallRadius = 200;
+let bigBallRadius = 150;
 let bigBallAngle = 0;
 let angleX = 0;
 let angleY = 0;
@@ -32,10 +32,13 @@ function draw() {
   strokeWeight(2);
   bigBallAngle += 0.01;
 
-  for (let ball of balls) {
-    ball.update();
-    ball.display();
-    ball.checkCollision();
+  for (let i = 0; i < balls.length; i++) {
+    for (let j = i + 1; j < balls.length; j++) {
+      balls[i].checkBallCollision(balls[j]);
+    }
+    balls[i].update();
+    balls[i].display();
+    balls[i].checkCollision();
   }
 
   // 更新FPS显示
@@ -61,17 +64,16 @@ function mouseWheel(event) {
 class Ball {
   constructor() {
     this.pos = p5.Vector.random3D().mult(random(bigBallRadius - 10)); // 修改为3D向量
-    this.vel = p5.Vector.random3D().mult(random(0.5, 1)); // 修改为3D向量，减慢速度
+    this.vel = p5.Vector.random3D().mult(random(1, 2)); // 修改为3D向量，加快速度
     this.r = 3; // 修改为3以减大小球
     this.color = color(random(255), random(255), random(255)); // 添加颜色属性
     this.trail = []; // 添加轨迹数组
-    this.color = color(random(255), random(255), random(255)); // 添加颜色属性
   }
 
   update() {
     this.pos.add(this.vel);
     this.trail.push(this.pos.copy()); // 更新轨迹点
-    if (this.trail.length > 50) { // 修改轨迹点数量限制到50
+    if (this.trail.length > 10) { // 修改轨迹点数量限制到50
       this.trail.shift();
     }
   }
@@ -102,6 +104,27 @@ class Ball {
     let distance = this.pos.mag();
     if (distance + this.r > bigBallRadius) {
       this.vel.reflect(this.pos.copy().normalize());
+    }
+  }
+
+  checkBallCollision(other) {
+    let distance = p5.Vector.dist(this.pos, other.pos);
+    if (distance < this.r + other.r) {
+      let normal = p5.Vector.sub(this.pos, other.pos).normalize();
+      let relativeVelocity = p5.Vector.sub(this.vel, other.vel);
+      let velocityAlongNormal = relativeVelocity.dot(normal);
+
+      if (velocityAlongNormal > 0) {
+        return;
+      }
+
+      let restitution = 1; // 弹性系数
+      let impulseMagnitude = -(1 + restitution) * velocityAlongNormal;
+      impulseMagnitude /= (1 / this.r + 1 / other.r);
+
+      let impulse = normal.mult(impulseMagnitude);
+      this.vel.add(impulse.div(this.r));
+      other.vel.sub(impulse.div(other.r));
     }
   }
 }
