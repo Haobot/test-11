@@ -72,7 +72,7 @@ function mouseDragged() {
 function mouseWheel(event) {
   // 根据滚轮的滚动方向调整缩放
   zoom -= event.delta * 0.001; // 修改为减法以对调缩放方向
-  zoom = constrain(zoom, 0.1, 5); // 限制缩放范围
+  zoom = constrain(zoom, 0.1, 10); // 限制缩放范围
 }
 
 class Ball {
@@ -86,6 +86,10 @@ class Ball {
 
   update() {
     this.pos.add(this.vel);
+    let distance = this.pos.mag();
+    if (distance + this.r > bigBallRadius) {
+      this.pos.setMag(bigBallRadius - this.r);
+    }
     this.trail.push(this.pos.copy()); // 更新轨迹点
     if (this.trail.length > 10) { // 修改轨迹点数量限制到50
       this.trail.shift();
@@ -117,6 +121,7 @@ class Ball {
   checkCollision() {
     let distance = this.pos.mag();
     if (distance + this.r > bigBallRadius) {
+      this.pos.setMag(bigBallRadius - this.r);
       this.vel.reflect(this.pos.copy().normalize());
     }
   }
