@@ -55,10 +55,29 @@ function draw() {
     ball.checkCollision();
   }
 
-  // 检查小球之间的碰撞
-  for (let i = 0; i < balls.length; i++) {
-    for (let j = i + 1; j < balls.length; j++) {
-      balls[i].checkBallCollision(balls[j]);
+  // 使用空间分区优化碰撞检测
+  const gridSize = bigBallRadius / 5;
+  const grid = new Map();
+  
+  // 将小球分配到网格
+  for (let ball of balls) {
+    const x = Math.floor(ball.pos.x / gridSize);
+    const y = Math.floor(ball.pos.y / gridSize);
+    const z = Math.floor(ball.pos.z / gridSize);
+    const key = `${x},${y},${z}`;
+    
+    if (!grid.has(key)) {
+      grid.set(key, []);
+    }
+    grid.get(key).push(ball);
+  }
+
+  // 只检查相邻网格中的小球
+  for (let [key, cellBalls] of grid) {
+    for (let i = 0; i < cellBalls.length; i++) {
+      for (let j = i + 1; j < cellBalls.length; j++) {
+        cellBalls[i].checkBallCollision(cellBalls[j]);
+      }
     }
   }
 
@@ -123,18 +142,19 @@ class Ball {
     sphere(this.r); // 使用sphere代替ellipse
     pop();
 
-    // 绘制轨迹
-    beginShape();
-    noFill();
-    for (let i = 0; i < this.trail.length; i++) {
-      let pos = this.trail[i];
-      let alpha = map(i, 0, this.trail.length, 255, 150); // 从255到150的透明度变化，确保轨迹可见
-      let tailColor = color(this.color.levels[0], this.color.levels[1], this.color.levels[2], alpha); // 使用小球的颜色
-      stroke(tailColor); // 设置尾焰颜色和透明度
-      strokeWeight(map(i, 0, this.trail.length, 15, 3)); // 从粗到细的尾焰效果
-      vertex(pos.x, pos.y, pos.z);
+    // 使用更高效的轨迹绘制方式
+    if (this.trail.length > 1) {
+      stroke(this.color);
+      strokeWeight(1);
+      beginShape(LINES);
+      for (let i = 1; i < this.trail.length; i++) {
+        const prev = this.trail[i - 1];
+        const curr = this.trail[i];
+        vertex(prev.x, prev.y, prev.z);
+        vertex(curr.x, curr.y, curr.z);
+      }
+      endShape();
     }
-    endShape();
   }
 
   checkCollision() {
@@ -146,21 +166,24 @@ class Ball {
   }
 
   checkBallCollision(other) {
-    let distance = p5.Vector.dist(this.pos, other.pos);
+    // 重用Vector对象
+    const temp1 = p5.Vector.sub(this.pos, other.pos);
+    const distance = temp1.mag();
+    
     if (distance < this.r + other.r) {
-      let normal = p5.Vector.sub(this.pos, other.pos).normalize();
-      let relativeVelocity = p5.Vector.sub(this.vel, other.vel);
-      let velocityAlongNormal = relativeVelocity.dot(normal);
+      const normal = temp1.normalize();
+      const temp2 = p5.Vector.sub(this.vel, other.vel);
+      const velocityAlongNormal = temp2.dot(normal);
 
       if (velocityAlongNormal > 0) {
         return;
       }
 
-      let restitution = 1; // 弹性系数
+      const restitution = 1; // 弹性系数
       let impulseMagnitude = -(1 + restitution) * velocityAlongNormal;
       impulseMagnitude /= (1 / this.r + 1 / other.r);
 
-      let impulse = normal.mult(impulseMagnitude);
+      const impulse = normal.mult(impulseMagnitude);
       this.vel.add(impulse.div(this.r));
       other.vel.sub(impulse.div(other.r));
     }
