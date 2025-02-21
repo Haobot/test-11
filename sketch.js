@@ -13,6 +13,9 @@ function setup() {
   createCanvas(windowWidth, windowHeight, WEBGL); // 修改为窗口宽度和高度
   angleMode(DEGREES);
   frameRate(60); // 设置目标帧率为60 FPS
+  bigBallRadiusSlider = createSlider(50, 200, bigBallRadius);
+  bigBallRadiusSlider.position(10, windowHeight - 30);
+  bigBallRadiusSlider.style('width', '150px');
   for (let i = 0; i < numBalls; i++) {
     balls.push(new Ball());
   }
@@ -26,11 +29,20 @@ function draw() {
   noFill();
   stroke(0, 100);
   strokeWeight(2);
+  bigBallRadius = bigBallRadiusSlider.value();
   sphere(bigBallRadius); // 使用sphere代替ellipse
   // 确保轨迹可见性
   noFill();
   strokeWeight(2);
   bigBallAngle += 0.01;
+
+  // 更新小球位置
+  for (let i = 0; i < balls.length; i++) {
+    let distance = balls[i].pos.mag();
+    if (distance > bigBallRadius) {
+      balls[i].pos.setMag(bigBallRadius - 10);
+    }
+  }
 
   for (let i = 0; i < balls.length; i++) {
     for (let j = i + 1; j < balls.length; j++) {
@@ -51,8 +63,10 @@ function draw() {
 }
 
 function mouseDragged() {
-  angleY += (mouseX - pmouseX) * 0.1; // 修改为0.1以减慢旋转速度
-  angleX -= (mouseY - pmouseY) * 0.1; // 修改符号以反转Y轴方向
+  if (!bigBallRadiusSlider.mouseIsOver()) {
+    angleY += (mouseX - pmouseX) * 0.1; // 修改为0.1以减慢旋转速度
+    angleX -= (mouseY - pmouseY) * 0.1; // 修改符号以反转Y轴方向
+  }
 }
 
 function mouseWheel(event) {
