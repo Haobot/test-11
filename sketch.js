@@ -63,9 +63,14 @@ function draw() {
 }
 
 function mouseDragged() {
-  if (!bigBallRadiusSlider.mouseIsOver()) {
-    angleY += (mouseX - pmouseX) * 0.1; // 修改为0.1以减慢旋转速度
-    angleX -= (mouseY - pmouseY) * 0.1; // 修改符号以反转Y轴方向
+  console.log("mouseDragged called");
+  // 检测鼠标是否在滑杆区域内（x:10-160, y:窗口高度-30到窗口高度-10）
+  const inSliderArea = mouseX > 10 && mouseX < 160 &&
+                       mouseY > (windowHeight - 30) &&
+                       mouseY < (windowHeight - 10);
+  if (!inSliderArea) {
+    angleY += (mouseX - pmouseX) * 0.1;
+    angleX -= (mouseY - pmouseY) * 0.1;
   }
 }
 
