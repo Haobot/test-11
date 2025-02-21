@@ -48,26 +48,23 @@ function draw() {
   bigBallRadius = bigBallRadiusSlider.value();
   diameterValue.html(bigBallRadius);
   sphere(bigBallRadius); // 使用sphere代替ellipse
-  // 确保轨迹可见性
-  noFill();
-  strokeWeight(2);
-  bigBallAngle += 0.01;
 
   // 更新小球位置
-  for (let i = 0; i < balls.length; i++) {
-    let distance = balls[i].pos.mag();
-    if (distance > bigBallRadius) {
-      balls[i].pos.setMag(bigBallRadius - 10);
-    }
+  for (let ball of balls) {
+    ball.update();
+    ball.checkCollision();
   }
 
+  // 检查小球之间的碰撞
   for (let i = 0; i < balls.length; i++) {
     for (let j = i + 1; j < balls.length; j++) {
       balls[i].checkBallCollision(balls[j]);
     }
-    balls[i].update();
-    balls[i].display();
-    balls[i].checkCollision();
+  }
+
+  // 批量绘制小球和轨迹
+  for (let ball of balls) {
+    ball.display();
   }
 
   // 更新FPS显示
