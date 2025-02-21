@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Transparent Sphere with Moving Balls</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+  <script src="sketch.js"></script>
+  <style>
+    body, html {
+      height: 100%;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    canvas {
+      display: block;
+    }
+    #fps-display {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      color: #00ff00;
+      font-family: monospace;
+      font-size: 32px;
+      background: rgba(0,0,0,0.7);
+      padding: 5px 10px;
+      border-radius: 3px;
+      z-index: 100;
+    }
+  </style>
+</head>
+<body>
+  <div id="fps-display"></div>
+</body>
+</html>
