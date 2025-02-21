@@ -92,7 +92,7 @@ class Ball {
       let alpha = map(i, 0, this.trail.length, 255, 150); // 从255到150的透明度变化，确保轨迹可见
       let tailColor = color(this.color.levels[0], this.color.levels[1], this.color.levels[2], alpha); // 使用小球的颜色
       stroke(tailColor); // 设置尾焰颜色和透明度
-      strokeWeight(map(i, 0, this.trail.length, 4, 1)); // 从粗到细的尾焰效果
+      strokeWeight(map(i, 0, this.trail.length, 15, 3)); // 从粗到细的尾焰效果
       vertex(pos.x, pos.y, pos.z);
     }
     endShape();
