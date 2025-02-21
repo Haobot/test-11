@@ -13,9 +13,25 @@ function setup() {
   createCanvas(windowWidth, windowHeight, WEBGL); // 修改为窗口宽度和高度
   angleMode(DEGREES);
   frameRate(60); // 设置目标帧率为60 FPS
+  // 滑杆居中显示
+  const sliderWidth = 200;
+  const sliderX = (windowWidth - sliderWidth) / 2;
+  const sliderY = windowHeight - 50;
+  
   bigBallRadiusSlider = createSlider(50, 200, bigBallRadius);
-  bigBallRadiusSlider.position(10, windowHeight - 30);
-  bigBallRadiusSlider.style('width', '150px');
+  bigBallRadiusSlider.position(sliderX, sliderY);
+  bigBallRadiusSlider.style('width', sliderWidth + 'px');
+  
+  // 添加大球直径文字和数值显示
+  diameterLabel = createP('大球直径');
+  diameterLabel.position(sliderX + 40, sliderY - 80);
+  diameterLabel.style('font-size', '30px');
+  diameterLabel.style('color', '#000');
+  
+  diameterValue = createP(bigBallRadius);
+  diameterValue.position(sliderX + sliderWidth + 10, sliderY - 43);
+  diameterValue.style('font-size', '30px');
+  diameterValue.style('color', '#000');
   for (let i = 0; i < numBalls; i++) {
     balls.push(new Ball());
   }
@@ -30,6 +46,7 @@ function draw() {
   stroke(0, 100);
   strokeWeight(2);
   bigBallRadius = bigBallRadiusSlider.value();
+  diameterValue.html(bigBallRadius);
   sphere(bigBallRadius); // 使用sphere代替ellipse
   // 确保轨迹可见性
   noFill();
